@@ -14,9 +14,18 @@ module Rulers
     # we pass the call method incoming information from a request via the ENV hash
     def call(env)
       # quick & dirty hack to handle nonexistent favicon file
-      if env['PATH_INFO'] == '/favicon.ico'
-        return [404,{'Content-Type' => 'text/html'}, []]
+      path_info = env['PATH_INFO']
+      # handle requests to a path that is not specified as a custom controller/action
+      case path_info
+        # returning 404 not found
+        when '/favicon.ico'
+          return [404,{'Content-Type' => 'text/html'}, []]
+        # set root route to return a welcome message
+        when '/'
+          return [200,{'Content-Type' => 'text/html'}, ['This is my homepage!']]
       end
+      # otherwise simply proceed and instantiate the controller that is specified in the URL
+
       # get_controller_and_action returns an array w/ two elements:
       # a controller name and an action name (both as strings)
       klass, act = get_controller_and_action(env)
