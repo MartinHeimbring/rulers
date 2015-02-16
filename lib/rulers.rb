@@ -4,6 +4,7 @@ require "rulers/version"
 require "rulers/routing"
 require "rulers/util"
 require "rulers/dependencies"
+require "rulers/controller"
 
 # this is our Framework
 module Rulers
@@ -37,19 +38,6 @@ module Rulers
       # a rack app always return a "triplet" - made up of "status code", "headers" and "body"
       # display content of text variable in response body
       [200, {'Content-Type' => 'text/html'}, [text]]
-    end
-  end
-
-  # other controllers will later inherit from Rulers::Controller
-  class Controller
-    # the controller just saves the environment that rack feeds it
-    def initialize(env)
-      @env = env
-    end
-
-    # getter method for env
-    def env
-      @env
     end
   end
 end
