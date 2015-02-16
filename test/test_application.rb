@@ -1,8 +1,21 @@
 # load the test_helper.rb file which is in the same directory
 require_relative "test_helper"
 
+
+# creat a TestController
+class TestController < Rulers::Controller
+  def index
+    "Hello" # not rendering a view!
+  end
+end
+
 # create a TestApp Class that inherits functionality from the Rulers Rack app
 class TestApp < Rulers::Application
+  # override get_controller_and_action methdo
+  def get_controller_and_action(env)
+    # and hard-code values for controller class and -action
+    [TestController, "index"]
+  end
 end
 
 # a test app that inherits from test::unit::testcase so we can test it
@@ -42,7 +55,7 @@ class RulersAppTest < Test::Unit::TestCase
 =end
 
   def test_request
-    get "/"
+    get "/example/route"
     assert last_response.ok?
     body = last_response.body
     assert body["Hello"]
