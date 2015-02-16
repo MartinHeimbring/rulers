@@ -1,9 +1,9 @@
 # require the array file that contains an ActiveSupport-like useful method for interacting with arrays
 require "rulers/array"
-# require ruby version
 require "rulers/version"
-# require the routing.rb file
 require "rulers/routing"
+require "rulers/util"
+require "rulers/dependencies"
 
 # this is our Framework
 module Rulers
@@ -42,7 +42,7 @@ module Rulers
 
   # other controllers will later inherit from Rulers::Controller
   class Controller
-    # the controller just saves the environment that rack feed it
+    # the controller just saves the environment that rack feeds it
     def initialize(env)
       @env = env
     end
