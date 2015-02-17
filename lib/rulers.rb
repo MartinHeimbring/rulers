@@ -36,9 +36,17 @@ module Rulers
       # call instance method of controller with name inside the "act" variable
       # and put returned value into "text" variable
       text = controller.send(act)
-      # a rack app always return a "triplet" - made up of "status code", "headers" and "body"
-      # display content of text variable in response body
-      [200, {'Content-Type' => 'text/html'}, [text]]
+
+      #
+      if controller.get_response
+        st, hd, rs = controller.get_response.to_a
+        [st, hd, [rs.body].flatten]
+      else
+        # a rack app always return a "triplet" - made up of "status code", "headers" and "body"
+        # display content of text variable in response body
+        [200,
+         {'Content-Type' => 'text/html'}, [text]]
+      end
     end
   end
 end
