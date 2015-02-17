@@ -1,8 +1,13 @@
 require 'erubis'
+require_relative 'file_model'
 
 module Rulers
   # other controllers will later inherit from Rulers::Controller
   class Controller
+
+    # we include the Rulers::Model module so we can create a new FileModel by simply calling FileModel.new (instead of Rulers::Model::FileModel.new)
+    include Rulers::Model
+
     # the controller just saves the environment that rack feeds it
     def initialize(env)
       @env = env
