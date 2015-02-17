@@ -60,6 +60,9 @@ module Rulers
         # call .to_sql as safety precaution
         vals = keys.map{ |key| values[key] ? to_sql(values[key]) : "null" }
         # insert keys and respective values into table
+        #   The basic syntax of INSERT INTO statement:
+        #   INSERT INTO TABLE_NAME (column1, column2, column3,...columnN)]
+        #   VALUES (value1, value2, value3,...valueN);
         insert_values = "INSERT INTO #{table} (#{keys.join ","}) VALUES (#{vals.join ","});"
         DB.execute(insert_values)
         # create data hash from keys and values, kind of to "unite" those two arrays
@@ -84,6 +87,8 @@ module Rulers
       def self.find(id)
         # select all keys of the schema hash from the db table
         # where the id matches the input id
+        #   The basic syntax of SQLite SELECT statement is as follows:
+        #   SELECT column1, column2, columnN FROM table_name;
         find_record = "select #{schema.keys.join ","} from #{table} where id = #{id};"
         row = DB.execute find_record
         # take two arrays: schema.keys and row[0] and shuffle them together into a hash (zip FTW!)
@@ -119,7 +124,11 @@ module Rulers
           "#{k}=#{self.class.to_sql(v)}"
         end.join ","
         # update fields for record with @hash["id"]
-        update_table = "UPDATE #{self.class.table} SET #{fields} WHERE id = #{@hash["id"]}"
+        #   The basic syntax of UPDATE query with WHERE clause is as follows:
+        #   "UPDATE table_name
+        #   SET column1 = value1, column2 = value2...., columnN = valueN
+        #   WHERE [condition];""
+        update_table = "UPDATE #{self.class.table} SET #{fields} WHERE id = #{@hash["id"].to_i};"
         DB.execute update_table
         true
       end
@@ -129,6 +138,15 @@ module Rulers
         # the difference between save and save! is that save doesn't raise an exception
         # if saving fails, that's why we simply return "false" if an error occurs
         self.save! rescue false
+      end
+
+      # simple sql that deletes record from db
+      def delete!
+        #   The basic syntax of DELETE query with WHERE clause is as follows:
+        #   "DELETE FROM table_name
+        #   WHERE [condition];"
+        delete_row = "DELETE FROM #{self.class.table} WHERE id = #{@hash["id"].to_i};"
+        DB.execute delete_row
       end
     end
   end
