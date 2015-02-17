@@ -1,6 +1,7 @@
 require 'erubis'
 require_relative 'file_model'
 require 'rack/request'
+require_relative 'view'
 
 module Rulers
   # other controllers will later inherit from Rulers::Controller
@@ -34,8 +35,8 @@ module Rulers
     end
 
     # when render_response is called, instantiate a new Response object and pass it the erb view template as response body
-    def render_response(*args)
-      response(render(*args))
+    def render_response(filename, locals={})
+      response(render(filename, locals))
     end
 
     # Rack::Request provides a convenient interface to a Rack environment. It is stateless, the environment env passed to the constructor will be directly modified.
@@ -71,16 +72,15 @@ module Rulers
       filename = File.join "app", "views", controller_name, "#{view_name}.html.erb" # --> "app/views/view_name.html.erb"
       # open the file "filename" and store its content in the template variable then close the file
       template = File.read filename
-      # create a new instance of Eruby and instantiate it with the template
-      eruby = Erubis::Eruby.new(template)
-      # .result() accepts values for variables that get displayed in the erb template:
-      # example: Here is a <%= variable %>
-      # eruby.result(:variable => "variable")
-      # --> Here is a variable
-      # we make any variables we pass into the "locals" Hash available in the view
-      # and also merge the env into the locals Hash
-      # so we can always access it in the view
-      eruby.result locals.merge(:env => env)
+
+      # .instance_variables gets called on the current controller instance, returning all instance variable names in an array
+      # we create an empty hash (initial value for .reduce) and iterate over all instance variables of that controller instance
+      # we set each KEY to the name of the respective instance variable and the VALUE to the value of that instance variable
+      # then we return that hash and put it into the ivars variable
+      ivars = instance_variables.inject({}) {|ha, iv| ha[iv] = instance_variable_get(iv); ha }
+      # next we create a new Rulers::View object and pass the filename, the ivars and the locals to it
+      # inside Rulers::View.new.result I also instantiate a new eruby object and return the resulting template
+      Rulers::View.new(template, ivars, locals).result
     end
 
     # find out controller_name in order to dynamically compose the file_path to the file we want to render with erubis

@@ -6,6 +6,7 @@ require "rulers/util"
 require "rulers/dependencies"
 require "rulers/controller"
 require "rulers/file_model"
+require "rulers/view"
 
 # this is our Framework
 module Rulers
