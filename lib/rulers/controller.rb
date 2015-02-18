@@ -20,6 +20,71 @@ module Rulers
       @env
     end
 
+
+    # use self.action to initialize rack app, and dispatch to specific action
+
+    # this method will take the controller action (and optional routing params)
+    def self.action(act, rp = {})
+      # and return a proc object for the controller action
+      proc { |e| self.new(e).dispatch(act, rp) }
+    end
+
+
+    def dispatch(action, routing_params = {})
+      @routing_params = routing_params
+
+      text = self.send(action)
+
+      # when I want to "manually" render a view template with variables that are accessible in the view
+      # I have to call ".render_responde" inside my controller
+      # .render_response in return calls ".response", where we create and return a new instance of Rack::Response
+      # thus if I call .get_response on my controller, I will get back a Rack::Response object
+      if get_response
+        # constructing a response from the values inside the @response instance variable
+        # Rack::Response has an instance method called .finnish that returns a response
+        # in a way that Rack expects it: [Status, Header, Response]
+        # that method is aliased to ".to_a"
+        # btw the method looks like:
+=begin
+        def finish(&block)
+          @block = block
+
+          if [204, 205, 304].include?(status.to_i)
+            header.delete CONTENT_TYPE
+            header.delete CONTENT_LENGTH
+            close
+            [status.to_i, header, []]
+          else
+            [status.to_i, header, BodyProxy.new(self){}]
+          end
+        end
+        alias to_a finish           # For *response
+=end
+        # so let's recap: we get a Rack::Response object back (from calling .get_response) and call ".to_a" (".finish", respectively) on that object
+        # we store status, header and response in variables
+        st, hd, rs = get_response.to_a
+        # and return them inside an array, just like Rack expects us to
+        # we flatten rs.body, in case the rs.body is a multi-dimensional array
+        [st, hd, [rs.body].flatten]
+      else
+        # a rack app always return a "triplet" - made up of "status code", "headers" and "body"
+        # display content of text variable in response body
+        # this would be a default response:
+
+        #[200,{'Content-Type' => 'text/html'}, [text]]
+
+        # but we are trying to implement Rails Automatic Rendering
+        render_response(action.to_sym)
+      end
+    end
+
+
+    # Change this too!
+    def params
+      request.params.merge @routing_params
+    end
+
+
     # Rack::Response provides a convenient interface to create a Rack response.
     # It allows setting of headers and cookies, and provides useful defaults (a OK response containing HTML).
     # create a new response object
