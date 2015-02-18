@@ -141,11 +141,11 @@ module Rulers
       end
 
       # simple sql that deletes record from db
-      def delete!
+      def destroy
         #   The basic syntax of DELETE query with WHERE clause is as follows:
         #   "DELETE FROM table_name
         #   WHERE [condition];"
-        delete_row = "DELETE FROM #{self.class.table} WHERE id = #{@hash["id"].to_i};"
+        delete_row = "DELETE FROM #{self.class.table} WHERE id = #{@hash["id"]};"
         DB.execute delete_row
       end
     end
